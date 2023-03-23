@@ -5,7 +5,7 @@
     "build": "remix build",
     "deploy": "wrangler publish",
     "dev:remix": "remix watch",
-    "dev:miniflare": "cross-env NODE_ENV=development miniflare ./build/index.js --watch --port 3000",
+    "dev:miniflare": "cross-env NODE_ENV=development miniflare ./build/index.js --watch --port 3000 --host 0.0.0.0",
     "dev": "npm-run-all build --parallel \"dev:*\"",
     "start": "cross-env NODE_ENV=production miniflare ./build/index.js",
     "typecheck": "tsc"
@@ -16,11 +16,13 @@
     "@remix-run/cloudflare-workers": "^1.14.3",
     "@remix-run/react": "^1.14.3",
     "cross-env": "^7.0.3",
+    "esbuild-wasm": "0.17.12",
     "isbot": "^3.6.5",
     "monaco-editor": "^0.36.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "remix-utils": "^6.0.0"
+    "remix-utils": "^6.0.0",
+    "zustand": "^4.3.6"
   },
   "devDependencies": {
     "@cloudflare/workers-types": "^3.18.0",
@@ -28,6 +30,7 @@
     "@remix-run/eslint-config": "^1.14.3",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
+    "@webgpu/types": "^0.1.30",
     "eslint": "^8.27.0",
     "miniflare": "^2.11.0",
     "npm-run-all": "^4.1.5",

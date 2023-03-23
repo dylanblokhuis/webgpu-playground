@@ -11,13 +11,14 @@ import stylesheet from "~/tailwind.css";
 
 export const meta: MetaFunction = () => ({
   charset: "utf-8",
-  title: "New Remix App",
+  title: "WebGPU playground",
   viewport: "width=device-width,initial-scale=1",
 });
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
 ];
+
 
 export default function App() {
   return (
@@ -26,7 +27,7 @@ export default function App() {
         <Meta />
         <Links />
       </head>
-      <body className="w-full h-full bg-[#1e1e1e]">
+      <body className="w-full h-full bg-slate-900">
         <Outlet />
         <ScrollRestoration />
         <Scripts />
