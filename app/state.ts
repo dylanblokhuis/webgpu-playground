@@ -97,6 +97,9 @@ interface State {
   currentFileKey: CodeFile["name"]
   updateCurrentFile: (code: CodeFile["code"]) => void
   setCurrentFile: (name: CodeFile["name"]) => void
+  errors: string[]
+  insertError: (error: string) => void
+  wipeErrors: () => void
 }
 
 const useStore = create<State>((set) => ({
@@ -137,6 +140,26 @@ const useStore = create<State>((set) => ({
       return {
         ...state,
         currentFileKey: name
+      }
+    })
+  },
+  errors: [],
+  insertError: (error: string) => {
+    set((state) => {
+      return {
+        ...state,
+        errors: [
+          ...state.errors,
+          error
+        ]
+      }
+    })
+  },
+  wipeErrors: () => {
+    set((state) => {
+      return {
+        ...state,
+        errors: []
       }
     })
   }

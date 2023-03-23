@@ -17,6 +17,7 @@ export const meta: MetaFunction = () => ({
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },
+  { rel: "icon", href: "/favicon.svg" },
 ];
 
 
@@ -26,6 +27,7 @@ export default function App() {
       <head>
         <Meta />
         <Links />
+
       </head>
       <body className="w-full h-full bg-slate-900">
         <Outlet />

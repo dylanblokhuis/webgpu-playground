@@ -3,6 +3,7 @@ import useStore from "~/state";
 import { loadWASM } from 'onigasm' // peer dependency of 'monaco-textmate'
 import { Registry } from 'monaco-textmate' // peer dependency
 import { wireTmGrammars } from 'monaco-editor-textmate'
+import clsx from "clsx";
 
 async function fetchWebGpuTypes() {
   const res = await fetch("/editor-types/webgpu.d.ts")
@@ -25,6 +26,7 @@ export default function EditorW() {
     monaco.languages.register({
       id: "wgsl",
     })
+
     await loadWASM('/static/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
     const registry = new Registry({
       getGrammarDefinition: async (scopeName) => {
@@ -46,28 +48,30 @@ export default function EditorW() {
   }
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col border-l border-slate-700">
       <div className="flex">
         {files.map((file) => (
           <button
             key={file.name}
             onClick={() => setCurrentFile(file.name)}
-            className="bg-gray-800 text-white px-4 py-2"
+            className={clsx("text-white px-4 py-2 font-mono font-thin border-r border-t border-slate-700 hover:border-slate-600 transition-colors hover:bg-slate-800", currentFile?.name === file.name && "bg-slate-800")}
           >
+            <span className="mr-2">{currentFile?.name === file.name && "🖊️"}</span>
             {file.name}
           </button>
         ))}
       </div>
       <Editor
         className="h-full"
-        language={currentFile?.lang}
-        value={currentFile?.code}
+        defaultLanguage={currentFile?.lang}
+        defaultValue={currentFile?.code}
         theme="vs-dark"
         onChange={handleChange}
         beforeMount={handleEditorWillMount}
+        path={currentFile?.name}
         options={{
           minimap: {
-            enabled: false
+            enabled: false,
           }
         }}
       />
