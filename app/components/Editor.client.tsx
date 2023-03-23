@@ -1,5 +1,8 @@
 import Editor, { type Monaco } from "@monaco-editor/react";
 import useStore from "~/state";
+import { loadWASM } from 'onigasm' // peer dependency of 'monaco-textmate'
+import { Registry } from 'monaco-textmate' // peer dependency
+import { wireTmGrammars } from 'monaco-editor-textmate'
 
 async function fetchWebGpuTypes() {
   const res = await fetch("/editor-types/webgpu.d.ts")
@@ -16,10 +19,25 @@ export default function EditorW() {
       setCurrentFile: state.setCurrentFile
     }
   });
-  // const { ts, setTs } = useStore((state) => ({ ts: state.ts, setTs: state.setTs }));
 
   async function handleEditorWillMount(monaco: Monaco) {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(await fetchWebGpuTypes(), "webgpu.d.ts")
+    monaco.languages.register({
+      id: "wgsl",
+    })
+    await loadWASM('/static/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
+    const registry = new Registry({
+      getGrammarDefinition: async (scopeName) => {
+        return {
+          format: 'json',
+          content: await (await fetch(`https://raw.githubusercontent.com/wgsl-analyzer/wgsl-analyzer/main/editors/code/syntaxes/wgsl.tmLanguage.json`)).text()
+        }
+      }
+    })
+
+    const grammars = new Map()
+    grammars.set('wgsl', 'source.wgsl')
+    await wireTmGrammars(monaco, registry, grammars)
   }
 
   function handleChange(code: string | undefined) {
@@ -32,6 +50,7 @@ export default function EditorW() {
       <div className="flex">
         {files.map((file) => (
           <button
+            key={file.name}
             onClick={() => setCurrentFile(file.name)}
             className="bg-gray-800 text-white px-4 py-2"
           >
@@ -41,7 +60,7 @@ export default function EditorW() {
       </div>
       <Editor
         className="h-full"
-        defaultLanguage="typescript"
+        language={currentFile?.lang}
         value={currentFile?.code}
         theme="vs-dark"
         onChange={handleChange}

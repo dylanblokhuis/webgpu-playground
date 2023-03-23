@@ -86,7 +86,7 @@ fn fs_main() -> @location(0) vec4<f32> {
 `
 
 export interface CodeFile {
-  lang: "ts" | "wgsl",
+  lang: "typescript" | "wgsl",
   name: string,
   code: string
   entryPoint?: boolean
@@ -102,7 +102,7 @@ interface State {
 const useStore = create<State>((set) => ({
   files: [
     {
-      lang: "ts",
+      lang: "typescript",
       name: "app.ts",
       code: ts,
       entryPoint: true

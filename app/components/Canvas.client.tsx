@@ -8,7 +8,7 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement)
   if (!isEsbuildInit) {
     await esbuild.initialize({
       worker: true,
-      wasmURL: "/esbuild.wasm"
+      wasmURL: "/static/esbuild.wasm"
     });
     isEsbuildInit = true;
   }
