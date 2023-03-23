@@ -1,4 +1,4 @@
-name = "remix-cloudflare-workers"
+name = "webgpu-playground"
 
 workers_dev = true
 main = "./build/index.js"
