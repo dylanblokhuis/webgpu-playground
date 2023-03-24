@@ -1,10 +1,7 @@
 node_modules
 
 /.cache
-/build
-/dist
+/functions/\[\[path\]\].js
+/functions/\[\[path\]\].js.map
 /public/build
-/.mf
 .env
-/public/esbuild.wasm
-/public/editor-types

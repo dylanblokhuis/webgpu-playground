@@ -28,8 +28,8 @@ export default async function handleRequest(
   if (url.hostname === "localhost" && url.port === "3000") {
     responseHeaders.set("Origin-Trial", "Aotk4lKyJjKvozg4JQVI4jGolGC06ZvTfZvwadeZiFeSA0v7WAcM4B5aheEG632PcQTxLQDazEEFfF1k5Sr7agIAAABJeyJvcmlnaW4iOiJodHRwOi8vbG9jYWxob3N0OjMwMDAiLCJmZWF0dXJlIjoiV2ViR1BVIiwiZXhwaXJ5IjoxNjkxNzExOTk5fQ==")
   }
-  if (url.hostname === "webgpu-playground.blokys.workers.dev") {
-    responseHeaders.set("Origin-Trial", "AtcPhDMQ7C8uPueyiBrbRuK+lFtlYLkmKjzFxr0/4fR/vVCm/VU9aeV9fqW608NMenrJ+RtpfjL2BsOW6yk5EgIAAABkeyJvcmlnaW4iOiJodHRwczovL3dlYmdwdS1wbGF5Z3JvdW5kLmJsb2t5cy53b3JrZXJzLmRldjo0NDMiLCJmZWF0dXJlIjoiV2ViR1BVIiwiZXhwaXJ5IjoxNjkxNzExOTk5fQ==")
+  if (url.hostname === "webgpu.blokhuis.dev") {
+    responseHeaders.set("Origin-Trial", "AgXh2KuNX4BFu8re72hcm/HtLKLFUiuBOcFVwBgra7NMFXtnYv3Ue84r8L9+PQyhRUWL7Xcsg4gwxqw17thw9A4AAABTeyJvcmlnaW4iOiJodHRwczovL3dlYmdwdS5ibG9raHVpcy5kZXY6NDQzIiwiZmVhdHVyZSI6IldlYkdQVSIsImV4cGlyeSI6MTY5MTcxMTk5OX0=")
   }
 
   responseHeaders.set("Content-Type", "text/html");
