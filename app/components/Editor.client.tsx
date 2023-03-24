@@ -6,7 +6,7 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 import clsx from "clsx";
 
 async function fetchWebGpuTypes() {
-  const res = await fetch("/editor-types/webgpu.d.ts")
+  const res = await fetch("/static/editor-types/webgpu.d.ts")
   const text = await res.text()
   return text
 }
@@ -72,7 +72,9 @@ export default function EditorW() {
         options={{
           minimap: {
             enabled: false,
-          }
+          },
+					fontSize: 16,
+
         }}
       />
     </div>
