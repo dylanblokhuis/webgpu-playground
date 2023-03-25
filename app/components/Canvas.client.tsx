@@ -1,10 +1,12 @@
 import { useEffect, useRef } from "react"
-import useStore, { CodeFile } from "~/state";
+import useStore, { CodeFile, ConsoleLog } from "~/state";
 import * as esbuild from "esbuild-wasm"
 
 let isEsbuildInit = false;
 
-async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, errorCb: (error: string) => void): Promise<boolean> {
+let currentFrameCallback: number | null = null;
+
+async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, logCb: (log: ConsoleLog) => void): Promise<boolean> {
   if (!isEsbuildInit) {
     await esbuild.initialize({
       worker: true,
@@ -12,6 +14,16 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     });
     isEsbuildInit = true;
   }
+
+  const adapter = await navigator.gpu.requestAdapter();
+  if (!adapter) {
+    console.log("No adapter found");
+    throw new Error("No WebGPU adapter found")
+  }
+  const device = await adapter.requestDevice();
+  device.pushErrorScope('validation');
+  const context = canvas.getContext('webgpu') as GPUCanvasContext;
+
 
   const tsEntrypoint = files.find(it => it.entryPoint);
   if (!tsEntrypoint) {
@@ -22,6 +34,7 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     throw new Error("No shader code found")
   }
 
+  const defaultConsoleLog = console.log.bind(console);
   try {
     const result = await esbuild.transform(tsEntrypoint.code, {
       loader: "ts",
@@ -30,14 +43,42 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
       + encodeURIComponent(result.code);
 
     const module = await import(dataUri)
-    await module.default(canvas, shaderCode.code)
+    console.log = (message) => {
+      logCb({
+        type: "log",
+        message: message.toString().replace("<stdin>", tsEntrypoint.name)
+      })
+    }
+    const frameCallback = await module.default(device, context, shaderCode.code)
+    const callback = () => {
+      console.log = (message) => {
+        logCb({
+          type: "log",
+          message: message.toString().replace("<stdin>", tsEntrypoint.name)
+        })
+      }
+      frameCallback();
+      currentFrameCallback = requestAnimationFrame(callback);
+      console.log = defaultConsoleLog;
+    }
+
+    callback()
+
+    // currentFrameCallback = id;
+    const maybeError = await device.popErrorScope();
+    if (maybeError) {
+      throw new Error(maybeError.message)
+    }
+    console.log = defaultConsoleLog;
     return true;
   } catch (error) {
     if (error instanceof Error) {
-      errorCb(error.message.replace("<stdin>", tsEntrypoint.name))
+      logCb({ type: "error", message: error.message.replace("<stdin>", tsEntrypoint.name) })
     } else {
-      errorCb("Unknown error")
+      logCb({ type: "error", message: "Unknown error" })
     }
+
+    console.log = defaultConsoleLog;
     return false;
   }
 }
@@ -45,20 +86,18 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
 export default function Canvas() {
   const ref = useRef<HTMLCanvasElement>(null);
   const files = useStore((state) => state.files);
-  const insertError = useStore((state) => state.insertError);
-  const wipeErrors = useStore((state) => state.wipeErrors);
+  const insertLog = useStore((state) => state.insertLog);
+  const wipeLogs = useStore((state) => state.wipeLogs);
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-
-    transformAndRunCode(files, canvas, insertError).then((result) => {
-      console.log("Code executed")
-      if (result) wipeErrors();
-    })
+    if (currentFrameCallback) cancelAnimationFrame(currentFrameCallback);
+    wipeLogs();
+    transformAndRunCode(files, canvas, insertLog).then((result) => { })
   }, [ref, files]);
 
   return (
-    <canvas className="aspect-video w-full max-h-full" ref={ref} />
+    <canvas className="w-full aspect-video " ref={ref} />
   )
 }

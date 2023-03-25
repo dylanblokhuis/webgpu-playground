@@ -1,26 +1,15 @@
 import { create } from "zustand";
 
-const ts = `export default async function(canvas: HTMLCanvasElement, shaderCode: string) {
-  const adapter = await navigator.gpu.requestAdapter();
-  if (!adapter) {
-    console.log("No adapter found");
-    return;
-  }
-  const device = await adapter.requestDevice();
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
+const ts = `export default async function(device: GPUDevice, context: GPUCanvasContext, shaderCode: string) {
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
-  console.log("presentationFormat", presentationFormat);
   context.configure({
     device,
     format: presentationFormat,
     alphaMode: 'opaque',
   });
-
   const shaderModule = device.createShaderModule({
     code: shaderCode,
   })
-
   const pipeline = device.createRenderPipeline({
     layout: 'auto',
     vertex: {
@@ -41,7 +30,7 @@ const ts = `export default async function(canvas: HTMLCanvasElement, shaderCode:
     },
   });
 
-  requestAnimationFrame(function () {
+  return function () {
     const commandEncoder = device.createCommandEncoder();
     const textureView = context.getCurrentTexture().createView();
 
@@ -62,7 +51,7 @@ const ts = `export default async function(canvas: HTMLCanvasElement, shaderCode:
     passEncoder.end();
 
     device.queue.submit([commandEncoder.finish()]);
-  });
+  }
 }
 `
 
@@ -92,14 +81,19 @@ export interface CodeFile {
   entryPoint?: boolean
 }
 
+export interface ConsoleLog {
+  type: "log" | "error",
+  message: string
+}
+
 interface State {
   files: CodeFile[]
   currentFileKey: CodeFile["name"]
   updateCurrentFile: (code: CodeFile["code"]) => void
   setCurrentFile: (name: CodeFile["name"]) => void
-  errors: string[]
-  insertError: (error: string) => void
-  wipeErrors: () => void
+  logs: ConsoleLog[]
+  insertLog: (log: ConsoleLog) => void
+  wipeLogs: () => void
 }
 
 const useStore = create<State>((set) => ({
@@ -143,23 +137,23 @@ const useStore = create<State>((set) => ({
       }
     })
   },
-  errors: [],
-  insertError: (error: string) => {
+  logs: [],
+  insertLog: (log) => {
     set((state) => {
       return {
         ...state,
-        errors: [
-          ...state.errors,
-          error
+        logs: [
+          ...state.logs,
+          log
         ]
       }
     })
   },
-  wipeErrors: () => {
+  wipeLogs: () => {
     set((state) => {
       return {
         ...state,
-        errors: []
+        logs: []
       }
     })
   }

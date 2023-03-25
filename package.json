@@ -8,7 +8,7 @@
     "dev": "npm-run-all build --parallel \"dev:*\"",
     "start": "cross-env NODE_ENV=production npm run server",
     "typecheck": "tsc",
-    "server": "wrangler pages dev ./public --port 3000"
+    "server": "wrangler pages dev ./public --port 3000 --compatibility-date=2023-03-24"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.4.6",
@@ -19,6 +19,7 @@
     "cross-env": "^7.0.3",
     "esbuild-wasm": "0.17.12",
     "isbot": "^3.6.5",
+    "lodash.debounce": "^4.0.8",
     "monaco-editor": "^0.36.1",
     "monaco-editor-textmate": "^4.0.0",
     "monaco-textmate": "^3.0.1",
@@ -31,6 +32,7 @@
     "@cloudflare/workers-types": "^3.18.0",
     "@remix-run/dev": "^1.14.3",
     "@remix-run/eslint-config": "^1.14.3",
+    "@types/lodash.debounce": "^4.0.7",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "@webgpu/types": "^0.1.30",

@@ -4,6 +4,8 @@ import { loadWASM } from 'onigasm' // peer dependency of 'monaco-textmate'
 import { Registry } from 'monaco-textmate' // peer dependency
 import { wireTmGrammars } from 'monaco-editor-textmate'
 import clsx from "clsx";
+import { useCallback } from "react";
+import debounce from 'lodash.debounce';
 
 async function fetchWebGpuTypes() {
   const res = await fetch("/static/editor-types/webgpu.d.ts")
@@ -47,8 +49,12 @@ export default function EditorW() {
     updateCurrentFile(code)
   }
 
+  const debouncedChangeHandler = useCallback(
+    debounce(handleChange, 500)
+    , []);
+
   return (
-    <div className="flex flex-col border-l border-slate-700">
+    <div className="flex flex-col border-l border-slate-700 h-full">
       <div className="flex">
         {files.map((file) => (
           <button
@@ -60,20 +66,24 @@ export default function EditorW() {
             {file.name}
           </button>
         ))}
+
+        <button type="button">
+          Stop
+        </button>
       </div>
       <Editor
         className="h-full"
         defaultLanguage={currentFile?.lang}
         defaultValue={currentFile?.code}
         theme="vs-dark"
-        onChange={handleChange}
+        onChange={debouncedChangeHandler}
         beforeMount={handleEditorWillMount}
         path={currentFile?.name}
         options={{
           minimap: {
             enabled: false,
           },
-					fontSize: 16,
+          fontSize: 16,
 
         }}
       />
