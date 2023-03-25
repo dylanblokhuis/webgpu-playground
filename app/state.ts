@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-const ts = `export default async function(device: GPUDevice, context: GPUCanvasContext, shaderCode: string) {
+const ts = `export default async function(device: GPUDevice, context: GPUCanvasContext, shaderCode: string): Promise<() => void> {
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
   context.configure({
     device,
