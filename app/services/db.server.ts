@@ -97,7 +97,7 @@ export async function database() {
   const db = new Kysely<Database>({
     dialect: new D1Dialect({ database: requireContext().DB }),
   });
-  await migrateToLatest(db)
+  // await migrateToLatest(db)
   return db
 }
 

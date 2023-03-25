@@ -1,8 +1,0 @@
-name = "webgpu-playground"
-compatibility_date = "2023-03-24"
-compatibility_flags = ["streams_enable_constructors"]
-
-[[ d1_databases ]]
-binding = "DB"
-database_name = "webgpu-playground"
-database_id = "22e9e56c-dee4-4c72-b449-5d8ed8e5abf1"
