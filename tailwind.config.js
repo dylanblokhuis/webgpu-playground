@@ -5,6 +5,9 @@ module.exports = {
   ],
   theme: {
     extend: {
+      fontFamily: {
+        "mono": ["Ioveska", "Consolas", "monospace"],
+      }
     },
   },
   plugins: [],

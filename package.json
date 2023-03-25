@@ -8,7 +8,8 @@
     "dev": "npm-run-all build --parallel \"dev:*\"",
     "start": "cross-env NODE_ENV=production npm run server",
     "typecheck": "tsc",
-    "server": "wrangler pages dev ./public --port 3000 --compatibility-date=2023-03-24"
+    "server": "wrangler pages dev ./public --port 3000 --compatibility-date=2023-03-24",
+    "deploy": "npm run build && wrangler pages publish ./public"
   },
   "dependencies": {
     "@monaco-editor/react": "^4.4.6",

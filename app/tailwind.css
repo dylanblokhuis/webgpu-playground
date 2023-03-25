@@ -1,3 +1,15 @@
+@font-face {
+  font-family: 'Ioveska';
+  font-weight: normal;
+  src: url("/static/fonts/iosevka-regular-minimal.woff2");
+}
+
+@font-face {
+  font-family: 'Ioveska';
+  font-weight: bold;
+  src: url("/static/fonts/iosevka-bold-minimal.woff2");
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

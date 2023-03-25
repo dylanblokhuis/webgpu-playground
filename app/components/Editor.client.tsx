@@ -29,18 +29,32 @@ export default function EditorW() {
       id: "wgsl",
     })
 
+    monaco.editor.defineTheme('tokyo-night',
+      await (await fetch('/static/tokyo-night.json')).json()
+    )
+
+    monaco.editor.setTheme("tokyo-night")
+
     await loadWASM('/static/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
     const registry = new Registry({
       getGrammarDefinition: async (scopeName) => {
-        return {
-          format: 'json',
-          content: await (await fetch(`https://raw.githubusercontent.com/wgsl-analyzer/wgsl-analyzer/main/editors/code/syntaxes/wgsl.tmLanguage.json`)).text()
+        if (scopeName === 'source.wgsl') {
+          return {
+            format: 'json',
+            content: await (await fetch(`https://raw.githubusercontent.com/wgsl-analyzer/wgsl-analyzer/main/editors/code/syntaxes/wgsl.tmLanguage.json`)).text()
+          }
         }
-      }
+
+        return {
+          format: 'plist',
+          content: await (await fetch(`/static/TypeScript.tmLanguage`)).text()
+        }
+      },
     })
 
     const grammars = new Map()
     grammars.set('wgsl', 'source.wgsl')
+    grammars.set('typescript', 'source.ts')
     await wireTmGrammars(monaco, registry, grammars)
   }
 
@@ -84,6 +98,7 @@ export default function EditorW() {
             enabled: false,
           },
           fontSize: 16,
+          fontFamily: "Ioveska"
 
         }}
       />
