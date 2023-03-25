@@ -5,6 +5,8 @@ import * as esbuild from "esbuild-wasm"
 let isEsbuildInit = false;
 
 let currentFrameCallback: number | null = null;
+let fps = 0;
+let lastTime = performance.now();
 
 async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, logCb: (log: ConsoleLog) => void): Promise<boolean> {
   if (!isEsbuildInit) {
@@ -23,7 +25,6 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
   const device = await adapter.requestDevice();
   device.pushErrorScope('validation');
   const context = canvas.getContext('webgpu') as GPUCanvasContext;
-
 
   const tsEntrypoint = files.find(it => it.entryPoint);
   if (!tsEntrypoint) {
@@ -57,6 +58,10 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
           message: message.toString().replace("<stdin>", tsEntrypoint.name)
         })
       }
+      const currentTime = performance.now();
+      const elapsed = currentTime - lastTime;
+      fps = Math.round(1000 / elapsed);
+      lastTime = currentTime;
       frameCallback();
       currentFrameCallback = requestAnimationFrame(callback);
       console.log = defaultConsoleLog;
@@ -85,9 +90,7 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
 
 export default function Canvas() {
   const ref = useRef<HTMLCanvasElement>(null);
-  const files = useStore((state) => state.files);
-  const insertLog = useStore((state) => state.insertLog);
-  const wipeLogs = useStore((state) => state.wipeLogs);
+  const { files, insertLog, wipeLogs } = useStore((state) => ({ files: state.files, insertLog: state.insertLog, wipeLogs: state.wipeLogs }));
 
   useEffect(() => {
     const canvas = ref.current;
@@ -97,7 +100,17 @@ export default function Canvas() {
     transformAndRunCode(files, canvas, insertLog).then((result) => { })
   }, [ref, files]);
 
+  useEffect(() => {
+    const interval = setInterval(() => {
+      useStore.setState({ fps: fps })
+    }, 500)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [])
+
   return (
-    <canvas className="w-full aspect-video " ref={ref} />
+    <canvas className="w-full aspect-video" ref={ref} />
   )
 }

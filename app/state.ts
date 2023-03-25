@@ -94,6 +94,8 @@ interface State {
   logs: ConsoleLog[]
   insertLog: (log: ConsoleLog) => void
   wipeLogs: () => void
+
+  fps: number
 }
 
 const useStore = create<State>((set) => ({
@@ -156,7 +158,8 @@ const useStore = create<State>((set) => ({
         logs: []
       }
     })
-  }
+  },
+  fps: 0
 }));
 
 export default useStore;

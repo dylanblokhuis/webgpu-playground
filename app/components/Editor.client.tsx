@@ -35,19 +35,19 @@ export default function EditorW() {
 
     monaco.editor.setTheme("tokyo-night")
 
-    await loadWASM('/static/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
+    await loadWASM('/static/textmate/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
     const registry = new Registry({
       getGrammarDefinition: async (scopeName) => {
         if (scopeName === 'source.wgsl') {
           return {
             format: 'json',
-            content: await (await fetch(`https://raw.githubusercontent.com/wgsl-analyzer/wgsl-analyzer/main/editors/code/syntaxes/wgsl.tmLanguage.json`)).text()
+            content: await (await fetch(`/static/textmate/wgsl.tmLanguage.json`)).text()
           }
         }
 
         return {
           format: 'plist',
-          content: await (await fetch(`/static/TypeScript.tmLanguage`)).text()
+          content: await (await fetch(`/static/textmate/TypeScript.tmLanguage`)).text()
         }
       },
     })
