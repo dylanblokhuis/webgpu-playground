@@ -4,7 +4,7 @@ import { getProjectById, getProjectFiles } from "~/services/project.server";
 
 import useStore from "~/state";
 import { useEffect } from "react";
-import { ActionArgs, LoaderArgs, json } from '@remix-run/cloudflare'
+import { ActionArgs, LoaderArgs, json, MetaFunction, V2_MetaFunction } from '@remix-run/cloudflare'
 import { redirect } from 'react-router';
 import { UsersTable } from '~/services/db.server';
 import { createProject, updateOrCloneProject } from '~/services/project.server';
@@ -16,6 +16,13 @@ import Canvas from "~/components/Canvas.client";
 import Editor from "~/components/Editor.client";
 import PlaygroundTabs from "~/components/PlaygroundTabs";
 
+export const meta: V2_MetaFunction<typeof loader> = ({ data }) => {
+  return [
+    {
+      title: data.project ? `${data.project.name} - WebGPU playground` : "Draft - WebGPU playground",
+    }
+  ]
+}
 
 export async function loader({ context, request, params }: LoaderArgs) {
   const projectId = params.id;

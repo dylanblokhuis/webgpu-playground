@@ -1,4 +1,4 @@
-import type { LinksFunction, MetaFunction } from "@remix-run/cloudflare";
+import type { LinksFunction, MetaFunction, V2_MetaFunction } from "@remix-run/cloudflare";
 import {
   Link,
   Links,
@@ -11,11 +11,11 @@ import {
 } from "@remix-run/react";
 import stylesheet from "~/tailwind.css";
 
-export const meta: MetaFunction = () => ({
+export const meta: V2_MetaFunction = () => ([{
   charset: "utf-8",
   title: "WebGPU playground",
   viewport: "width=device-width,initial-scale=1",
-});
+}]);
 
 export const links: LinksFunction = () => [
   { rel: "stylesheet", href: stylesheet },

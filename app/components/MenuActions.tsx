@@ -7,8 +7,15 @@ export default function MenuActions() {
   const { files, project } = useStore(state => ({ files: state.files, project: state.project }))
 
   function handleSubmit() {
+    let name = project ? project.name : "Untitled"
+    const markdown = files.find(f => f.name === "README.md")
+    const firstLine = markdown?.code.split("\n")[0]
+    if (firstLine?.startsWith("# ")) {
+      name = firstLine.split("# ")[1]
+    }
+
     fetcher.submit({
-      name: project ? project.name : "Untitled",
+      name: name,
       files: JSON.stringify(files),
       projectId: project ? project.id : "",
     }, {

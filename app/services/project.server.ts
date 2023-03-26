@@ -72,16 +72,16 @@ export async function updateOrCloneProject(
         updated_at: new Date().toISOString(),
       }).where("id", "=", existingFile.id).executeTakeFirstOrThrow();
     } else {
-      // await db.insertInto("files").values({
-      //   id: generateDatabaseId(),
-      //   name: file.name,
-      //   code: file.code,
-      //   lang: file.lang,
-      //   created_at: new Date().toISOString(),
-      //   updated_at: new Date().toISOString(),
-      //   entrypoint: file.entryPoint ? 1 : 0,
-      //   project_id: projectId
-      // }).executeTakeFirstOrThrow();
+      await db.insertInto("files").values({
+        id: generateDatabaseId(),
+        name: file.name,
+        code: file.code,
+        lang: file.lang,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        entrypoint: file.entryPoint ? 1 : 0,
+        project_id: projectId
+      }).executeTakeFirstOrThrow();
     }
   }
 
