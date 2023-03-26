@@ -88,6 +88,7 @@ export default function Project() {
     useStore.setState({
       project,
       files: files.map(it => ({ code: it.code, name: it.name, entryPoint: it.entrypoint === 1, lang: it.lang as "wgsl" | "typescript" })),
+      currentFileKey: files.find(file => file.entrypoint)?.name,
     })
   }, [])
 
