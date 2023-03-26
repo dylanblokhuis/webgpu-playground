@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { ProjectsTable } from "./services/db.server";
 
 const ts = `export default async function(device: GPUDevice, context: GPUCanvasContext, shaderCode: string): Promise<() => void> {
   const presentationFormat = navigator.gpu.getPreferredCanvasFormat();
@@ -74,8 +75,10 @@ fn fs_main() -> @location(0) vec4<f32> {
 }
 `
 
+export type SupportedLanguages = "typescript" | "wgsl" | "markdown"
+
 export interface CodeFile {
-  lang: "typescript" | "wgsl",
+  lang: SupportedLanguages,
   name: string,
   code: string
   entryPoint?: boolean
@@ -91,11 +94,12 @@ interface State {
   currentFileKey: CodeFile["name"]
   updateCurrentFile: (code: CodeFile["code"]) => void
   setCurrentFile: (name: CodeFile["name"]) => void
+  createFile: (file: CodeFile) => void
   logs: ConsoleLog[]
   insertLog: (log: ConsoleLog) => void
   wipeLogs: () => void
-
   fps: number
+  project?: ProjectsTable
 }
 
 const useStore = create<State>((set) => ({
@@ -110,7 +114,7 @@ const useStore = create<State>((set) => ({
       lang: "wgsl",
       name: "shader.wgsl",
       code: shaderWgsl
-    }
+    },
   ],
   currentFileKey: "app.ts",
   updateCurrentFile(code) {
@@ -136,6 +140,17 @@ const useStore = create<State>((set) => ({
       return {
         ...state,
         currentFileKey: name
+      }
+    })
+  },
+  createFile(file) {
+    set((state) => {
+      return {
+        ...state,
+        files: [
+          ...state.files,
+          file
+        ]
       }
     })
   },

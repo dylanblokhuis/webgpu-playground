@@ -4,11 +4,16 @@ module.exports = {
     './app/**/*.{js,jsx,ts,tsx}',
   ],
   theme: {
+    container: {
+      center: true
+    },
     extend: {
       fontFamily: {
         "mono": ["Ioveska", "Consolas", "monospace"],
       }
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/typography'),
+  ],
 }

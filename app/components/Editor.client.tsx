@@ -6,12 +6,15 @@ import { wireTmGrammars } from 'monaco-editor-textmate'
 import clsx from "clsx";
 import { useCallback } from "react";
 import debounce from 'lodash.debounce';
+import MenuActions from "./MenuActions";
 
 async function fetchWebGpuTypes() {
   const res = await fetch("/static/editor-types/webgpu.d.ts")
   const text = await res.text()
   return text
 }
+
+let onigasmLoaded = false;
 
 export default function EditorW() {
   const { files, currentFile, updateCurrentFile, setCurrentFile } = useStore((state) => {
@@ -35,7 +38,10 @@ export default function EditorW() {
 
     monaco.editor.setTheme("tokyo-night")
 
-    await loadWASM('/static/textmate/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
+    if (!onigasmLoaded) {
+      await loadWASM('/static/textmate/onigasm.wasm') // You can also pass ArrayBuffer of onigasm.wasm file
+      onigasmLoaded = true
+    }
     const registry = new Registry({
       getGrammarDefinition: async (scopeName) => {
         if (scopeName === 'source.wgsl') {
@@ -69,22 +75,25 @@ export default function EditorW() {
 
   return (
     <div className="flex flex-col border-l border-slate-700 h-full">
-      <div className="flex">
-        {files.map((file) => (
-          <button
-            key={file.name}
-            onClick={() => setCurrentFile(file.name)}
-            className={clsx("text-white px-4 py-2 font-mono font-thin border-r border-t border-slate-700 hover:border-slate-600 transition-colors hover:bg-slate-800", currentFile?.name === file.name && "bg-slate-800")}
-          >
-            <span className="mr-2">{currentFile?.name === file.name && "🖊️"}</span>
-            {file.name}
-          </button>
-        ))}
+      <div className="flex justify-between">
+        <div className="flex">
+          {files.map((file) => (
+            <button
+              key={file.name}
+              onClick={() => setCurrentFile(file.name)}
+              className={clsx("text-white text-sm px-4 py-2 font-mono font-thin border-r border-t border-slate-700 hover:border-slate-600 transition-colors hover:bg-slate-800", currentFile?.name === file.name && "bg-slate-800")}
+            >
+              <span className="mr-2">{currentFile?.name === file.name && "🖊️"}</span>
+              {file.name}
+            </button>
+          ))}
+        </div>
 
-        <button type="button">
-          Stop
-        </button>
+        <div className="mr-2 flex gap-x-4">
+          <MenuActions />
+        </div>
       </div>
+
       <Editor
         className="h-full"
         defaultLanguage={currentFile?.lang}

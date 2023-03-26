@@ -6,13 +6,14 @@ let isEsbuildInit = false;
 
 let currentFrameCallback: number | null = null;
 let fps = 0;
-let lastTime = performance.now();
+let deviceContext: GPUCanvasContext | undefined;
+let device: GPUDevice | undefined;
 
 async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, logCb: (log: ConsoleLog) => void): Promise<boolean> {
   if (!isEsbuildInit) {
     await esbuild.initialize({
       worker: true,
-      wasmURL: "/static/esbuild.wasm"
+      wasmURL: "/static/esbuild.wasm",
     });
     isEsbuildInit = true;
   }
@@ -22,9 +23,9 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     console.log("No adapter found");
     throw new Error("No WebGPU adapter found")
   }
-  const device = await adapter.requestDevice();
+  if (!device) device = await adapter.requestDevice();
   device.pushErrorScope('validation');
-  const context = canvas.getContext('webgpu') as GPUCanvasContext;
+  if (!deviceContext) deviceContext = canvas.getContext('webgpu') as GPUCanvasContext;
 
   const tsEntrypoint = files.find(it => it.entryPoint);
   if (!tsEntrypoint) {
@@ -40,8 +41,7 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     const result = await esbuild.transform(tsEntrypoint.code, {
       loader: "ts",
     })
-    const dataUri = 'data:text/javascript;charset=utf-8,'
-      + encodeURIComponent(result.code);
+    const dataUri = 'data:text/javascript;charset=utf-8,' + encodeURIComponent(result.code);
 
     const module = await import(dataUri)
     console.log = (message) => {
@@ -50,7 +50,8 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
         message: message.toString().replace("<stdin>", tsEntrypoint.name)
       })
     }
-    const frameCallback = await module.default(device, context, shaderCode.code)
+    const frameCallback = await module.default(device, deviceContext, shaderCode.code)
+    let lastTime = performance.now();
     const callback = () => {
       console.log = (message) => {
         logCb({
@@ -68,12 +69,8 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     }
 
     callback()
-
-    // currentFrameCallback = id;
     const maybeError = await device.popErrorScope();
-    if (maybeError) {
-      throw new Error(maybeError.message)
-    }
+    if (maybeError) throw new Error(maybeError.message)
     console.log = defaultConsoleLog;
     return true;
   } catch (error) {
@@ -84,6 +81,7 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
     }
 
     console.log = defaultConsoleLog;
+
     return false;
   }
 }
@@ -91,13 +89,28 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
 export default function Canvas() {
   const ref = useRef<HTMLCanvasElement>(null);
   const { files, insertLog, wipeLogs } = useStore((state) => ({ files: state.files, insertLog: state.insertLog, wipeLogs: state.wipeLogs }));
+  let isBusyWithLastFrame = false;
+
+  function killAllFrames() {
+    if (currentFrameCallback) {
+      cancelAnimationFrame(currentFrameCallback);
+      while (currentFrameCallback--) {
+        cancelAnimationFrame(currentFrameCallback);
+        if (currentFrameCallback < 0) {
+          break;
+        }
+      }
+    }
+  }
 
   useEffect(() => {
     const canvas = ref.current;
     if (!canvas) return;
-    if (currentFrameCallback) cancelAnimationFrame(currentFrameCallback);
+    if (isBusyWithLastFrame) return;
+    killAllFrames();
     wipeLogs();
-    transformAndRunCode(files, canvas, insertLog).then((result) => { })
+    transformAndRunCode(files, canvas, insertLog).then(() => { })
+    isBusyWithLastFrame = true;
   }, [ref, files]);
 
   useEffect(() => {
@@ -107,6 +120,10 @@ export default function Canvas() {
 
     return () => {
       clearInterval(interval)
+      killAllFrames();
+      deviceContext?.unconfigure()
+      deviceContext = undefined;
+      useStore.setState({ fps: 0 })
     }
   }, [])
 

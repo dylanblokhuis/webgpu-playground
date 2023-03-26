@@ -1,8 +1,10 @@
 import type { LinksFunction, MetaFunction } from "@remix-run/cloudflare";
 import {
+  Link,
   Links,
   LiveReload,
   Meta,
+  NavLink,
   Outlet,
   Scripts,
   ScrollRestoration,
@@ -30,7 +32,13 @@ export default function App() {
 
       </head>
       <body className="w-full bg-slate-900 h-screen flex flex-col">
-        <Outlet />
+        <header className="p-4 text-white flex items-center justify-between h-[6%] container mx-auto">
+          <NavLink to="/" className="font-bold text-lg">🖼️ WebGPU playground</NavLink>
+        </header>
+
+        <main className="h-[94%]">
+          <Outlet />
+        </main>
         <ScrollRestoration />
         <Scripts />
         <LiveReload />
