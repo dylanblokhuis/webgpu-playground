@@ -11,7 +11,7 @@ export const sessionStorage = () => {
     // a Cookie from `createCookie` or the same CookieOptions to create one
     cookie: {
       name: "__session",
-      secrets: [requireContext().SESSION_SECRET],
+      secrets: [requireContext().SESSION_SECRET || "secret123"],
       sameSite: "lax",
     },
   });

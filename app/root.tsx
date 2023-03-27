@@ -1,4 +1,4 @@
-import type { LinksFunction, MetaFunction, V2_MetaFunction } from "@remix-run/cloudflare";
+import { LinksFunction, LoaderArgs, MetaFunction, V2_MetaFunction, json } from "@remix-run/cloudflare";
 import {
   Link,
   Links,
@@ -8,8 +8,11 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLoaderData,
 } from "@remix-run/react";
+import { Loader } from "esbuild-wasm";
 import stylesheet from "~/tailwind.css";
+import { getUser } from "./services/session.server";
 
 export const meta: V2_MetaFunction = () => ([{
   charset: "utf-8",
@@ -22,8 +25,16 @@ export const links: LinksFunction = () => [
   { rel: "icon", href: "/favicon.svg" },
 ];
 
+export async function loader({ request }: LoaderArgs) {
+  const user = await getUser(request);
+  return json({ user })
+}
+
 
 export default function App() {
+  const { user } = useLoaderData<typeof loader>();
+
+  console.log(user)
   return (
     <html className="w-full h-full" lang="en">
       <head>
@@ -34,6 +45,12 @@ export default function App() {
       <body className="w-full bg-slate-900 h-screen flex flex-col">
         <header className="p-4 text-white flex items-center justify-between h-[6%] container mx-auto">
           <NavLink to="/" className="font-bold text-lg">🖼️ WebGPU playground</NavLink>
+
+          {user && (
+            <div>
+              {user.name}
+            </div>
+          )}
         </header>
 
         <main className="h-[94%]">

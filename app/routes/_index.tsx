@@ -1,6 +1,5 @@
 import { LoaderArgs } from '@remix-run/cloudflare'
 import { Link, useLoaderData } from '@remix-run/react';
-import React from 'react'
 import { getProjects } from '~/services/project.server'
 
 export async function loader({ request }: LoaderArgs) {
