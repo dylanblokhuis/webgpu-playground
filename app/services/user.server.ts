@@ -27,7 +27,7 @@ async function ipHashSlice(ip: string) {
 }
 
 function ipFromRequest(request: Request) {
-  const ip = request.headers.get("x-real-ip") || request.headers.get("x-forwarded-for")
+  const ip = request.headers.get("x-forwarded-for") || request.headers.get("CF-Connecting-IP")
   if (!ip) throw new Error("No IP found")
   return ip
 }
