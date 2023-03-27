@@ -21,6 +21,11 @@ export default function PlaygroundTabs() {
           </NavLink>
           <span className={clsx('min-w-6 h-6 px-2 -ml-2 no-underline rounded-full flex items-center justify-center text-sm', logs.filter(l => l.type === "error").length > 0 ? "bg-red-500" : "bg-slate-700")}>{logs.length}</span>
 
+          |
+
+          <NavLink end to={`/project/${project?.id}/settings`} className={({ isActive }) => clsx("flex items-center", isActive && "font-bold  underline")}>
+            Settings
+          </NavLink>
         </div>
 
 

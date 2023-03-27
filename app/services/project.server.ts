@@ -107,3 +107,9 @@ export async function getProjects(opts: GetProjecstOpts) {
 
   return projects;
 }
+
+export async function deleteProject(id: string) {
+  const db = await database();
+  await db.deleteFrom("files").where("project_id", "=", id).executeTakeFirstOrThrow();
+  await db.deleteFrom("projects").where("id", "=", id).executeTakeFirstOrThrow();
+}
