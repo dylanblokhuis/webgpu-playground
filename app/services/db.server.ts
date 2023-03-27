@@ -59,7 +59,7 @@ export async function migrateToLatest(db: Kysely<Database>) {
               await db.schema
                 .createTable('projects')
                 .addColumn('id', 'text', (col) => col.primaryKey())
-                .addColumn('user_id', 'text', (col) => col.references('users.id'))
+                .addColumn('user_id', 'text', (col) => col.references('users.id').onDelete("cascade").onUpdate("cascade"))
                 .addColumn('name', 'text', (col) => col.notNull())
                 .addColumn('description', 'text')
                 .addColumn('created_at', 'text', (col) => col.notNull())
@@ -69,7 +69,7 @@ export async function migrateToLatest(db: Kysely<Database>) {
               await db.schema
                 .createTable('files')
                 .addColumn('id', 'text', (col) => col.primaryKey())
-                .addColumn('project_id', 'text', (col) => col.references('projects.id'))
+                .addColumn('project_id', 'text', (col) => col.references('projects.id').onDelete("cascade").onUpdate("cascade"))
                 .addColumn('name', 'text', (col) => col.notNull())
                 .addColumn('code', 'text', (col) => col.notNull())
                 .addColumn('lang', 'text', (col) => col.notNull())
