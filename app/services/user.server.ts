@@ -34,7 +34,6 @@ function ipFromRequest(request: Request) {
 
 export async function getUserByIp(request: Request): Promise<UsersTable | undefined> {
   const db = await database()
-  console.log(await ipHashSlice(ipFromRequest(request)));
 
   const user = await db.selectFrom('users')
     .selectAll()

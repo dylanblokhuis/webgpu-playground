@@ -39,7 +39,7 @@ export interface Database {
   users: UsersTable,
 }
 
-async function migrateToLatest(db: Kysely<Database>) {
+export async function migrateToLatest(db: Kysely<Database>) {
   const migrator = new Migrator({
     db,
     provider: {
@@ -91,6 +91,7 @@ async function migrateToLatest(db: Kysely<Database>) {
   const { error, results } = await migrator.migrateToLatest()
   if (error) throw error
   console.log("Migrating...", results, error);
+  return { results, error }
 }
 
 export async function database() {

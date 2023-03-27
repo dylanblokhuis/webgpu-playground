@@ -8,7 +8,7 @@ import { ActionArgs, LoaderArgs, json, MetaFunction, V2_MetaFunction } from '@re
 import { redirect } from 'react-router';
 import { UsersTable } from '~/services/db.server';
 import { createProject, updateOrCloneProject } from '~/services/project.server';
-import { getUser } from '~/services/session.server';
+import { createUserSession, getUser } from '~/services/session.server';
 import { createUserByIp } from '~/services/user.server';
 import { CodeFile } from '~/state';
 import { ClientOnly } from "remix-utils";
@@ -63,6 +63,7 @@ export async function action({ request, context }: ActionArgs) {
     }
   }
 
+
   const files = JSON.parse(filesJson as string) as CodeFile[];
   try {
     if (existingProjectId) {
@@ -72,7 +73,12 @@ export async function action({ request, context }: ActionArgs) {
         files,
       })
 
-      return redirect(`/project/${maybeNewId}`);
+      return await createUserSession({
+        request,
+        redirectTo: `/project/${maybeNewId}`,
+        remember: true,
+        userId: user.id
+      })
     }
 
     const projectId = await createProject({
@@ -80,7 +86,12 @@ export async function action({ request, context }: ActionArgs) {
       userId: user.id,
       files,
     })
-    return redirect(`/project/${projectId}`);
+    return await createUserSession({
+      request,
+      redirectTo: `/project/${projectId}`,
+      remember: true,
+      userId: user.id
+    })
   } catch (error) {
     console.error(error);
     return json("Failed to save...", { status: 500 });
