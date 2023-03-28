@@ -1,10 +1,10 @@
 import { useFetcher } from '@remix-run/react'
-import React from 'react'
+import React, { useEffect } from 'react'
 import useStore from '~/state';
 
 export default function MenuActions() {
   const fetcher = useFetcher();
-  const { files, project } = useStore(state => ({ files: state.files, project: state.project }))
+  const { files, project, unsavedChanges } = useStore(state => ({ files: state.files, project: state.project, unsavedChanges: state.unsavedChanges }))
 
   function handleSubmit() {
     let name = project ? project.name : "Untitled"
@@ -22,7 +22,43 @@ export default function MenuActions() {
       method: "post",
       action: project ? `/project/${project.id}` : "/project/draft",
     })
+    useStore.setState({ unsavedChanges: false })
   }
+
+  // prevent leaving the page with unsaved changes
+  useEffect(() => {
+    const handler = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = "";
+    };
+
+    if (unsavedChanges) {
+      window.addEventListener("beforeunload", handler);
+      // clean it up, if the dirty state changes
+      return () => {
+        window.removeEventListener("beforeunload", handler);
+      };
+    }
+    return () => { }
+  }, [unsavedChanges])
+
+  // handle ctrl+s to save
+  useEffect(() => {
+    function handler(e: KeyboardEvent) {
+      if (e.repeat) return;
+      if (e.key === "s" && (navigator.platform.match("Mac") ? e.metaKey : e.ctrlKey)) {
+        e.preventDefault();
+        handleSubmit();
+      }
+    }
+
+    document.addEventListener("keydown", handler)
+
+    return () => {
+      document.removeEventListener("keydown", handler)
+    }
+  }, [])
+
 
   return (
     <div className='flex items-center gap-x-4'>

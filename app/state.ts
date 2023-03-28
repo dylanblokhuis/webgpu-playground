@@ -98,6 +98,7 @@ interface State {
   logs: ConsoleLog[]
   insertLog: (log: ConsoleLog) => void
   wipeLogs: () => void
+  unsavedChanges: boolean
   fps: number
   project?: ProjectsTable
 }
@@ -117,6 +118,7 @@ const useStore = create<State>((set) => ({
     },
   ],
   currentFileKey: "app.ts",
+  unsavedChanges: false,
   updateCurrentFile(code) {
     set((state) => {
       const files = state.files.map((file) => {
@@ -131,6 +133,7 @@ const useStore = create<State>((set) => ({
 
       return {
         ...state,
+        unsavedChanges: true,
         files
       }
     })

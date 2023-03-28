@@ -44,7 +44,7 @@ export default function App() {
       </head>
       <body className="w-full bg-slate-900 h-screen flex flex-col">
         <header className="p-4 text-white flex items-center justify-between h-[6%] container mx-auto">
-          <NavLink to="/" className="font-bold text-lg">🖼️ WebGPU playground</NavLink>
+          <a href="/" className="font-bold text-lg">🖼️ WebGPU playground</a>
 
           {user && (
             <div>
