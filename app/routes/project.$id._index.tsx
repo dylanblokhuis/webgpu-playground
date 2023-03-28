@@ -1,13 +1,14 @@
-import { MetaFunction, SerializeFrom } from "@remix-run/cloudflare";
+import { SerializeFrom } from "@remix-run/cloudflare";
 import { useRouteLoaderData } from "@remix-run/react";
 import Markdown from 'markdown-to-jsx';
+import { shallow } from "zustand/shallow";
 import useStore from "~/state";
 import { loader } from "./project.$id"
 
 
 export default function Project() {
   const { project } = useRouteLoaderData("routes/project.$id") as SerializeFrom<typeof loader>;
-  const { files, createFile, setCurrentFile } = useStore((state) => ({ files: state.files, createFile: state.createFile, setCurrentFile: state.setCurrentFile }));
+  const { files, createFile, setCurrentFile } = useStore((state) => ({ files: state.files, createFile: state.createFile, setCurrentFile: state.setCurrentFile }), shallow);
   const readme = files.find(file => file.name === "README.md")
 
   return (

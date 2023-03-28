@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react"
 import useStore, { CodeFile, ConsoleLog } from "~/state";
 import * as esbuild from "esbuild-wasm"
+import { shallow } from "zustand/shallow";
 
 let isEsbuildInit = false;
 
@@ -9,7 +10,7 @@ let fps = 0;
 let deviceContext: GPUCanvasContext | undefined;
 let device: GPUDevice | undefined;
 
-async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, logCb: (log: ConsoleLog) => void): Promise<boolean> {
+async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement, logCb: (log: ConsoleLog) => void, paused: boolean): Promise<boolean> {
   if (!isEsbuildInit) {
     await esbuild.initialize({
       worker: true,
@@ -61,12 +62,17 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
       }
       const currentTime = performance.now();
       const elapsed = currentTime - lastTime;
-      fps = Math.round(1000 / elapsed);
+      if (elapsed !== 0) {
+        fps = Math.round(1000 / elapsed);
+      } else {
+        fps = 0;
+      }
       lastTime = currentTime;
       frameCallback();
-      currentFrameCallback = requestAnimationFrame(callback);
+      if (!paused) currentFrameCallback = requestAnimationFrame(callback);
       console.log = defaultConsoleLog;
     }
+
 
     callback()
     const maybeError = await device.popErrorScope();
@@ -88,7 +94,8 @@ async function transformAndRunCode(files: CodeFile[], canvas: HTMLCanvasElement,
 
 export default function Canvas() {
   const ref = useRef<HTMLCanvasElement>(null);
-  const { files, insertLog, wipeLogs } = useStore((state) => ({ files: state.files, insertLog: state.insertLog, wipeLogs: state.wipeLogs }));
+  const { files, insertLog, wipeLogs, paused } = useStore((state) => ({ files: state.files, insertLog: state.insertLog, wipeLogs: state.wipeLogs, paused: state.paused }), shallow);
+  const setFps = useStore((state) => state.setFps);
   let isBusyWithLastFrame = false;
 
   function killAllFrames() {
@@ -109,21 +116,21 @@ export default function Canvas() {
     if (isBusyWithLastFrame) return;
     killAllFrames();
     wipeLogs();
-    transformAndRunCode(files, canvas, insertLog).then(() => { })
+    transformAndRunCode(files, canvas, insertLog, paused).then(() => { })
     isBusyWithLastFrame = true;
-  }, [ref, files]);
+  }, [ref, files, paused]);
 
   useEffect(() => {
     const interval = setInterval(() => {
-      useStore.setState({ fps: fps })
-    }, 500)
+      setFps(fps);
+    }, 1000)
 
     return () => {
       clearInterval(interval)
       killAllFrames();
       deviceContext?.unconfigure()
       deviceContext = undefined;
-      useStore.setState({ fps: 0 })
+      setFps(0)
     }
   }, [])
 

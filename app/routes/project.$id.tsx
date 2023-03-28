@@ -63,7 +63,6 @@ export async function action({ request, context }: ActionArgs) {
     }
   }
 
-
   const files = JSON.parse(filesJson as string) as CodeFile[];
   try {
     if (existingProjectId) {
@@ -108,7 +107,7 @@ export default function Project() {
       files: files.map(it => ({ code: it.code, name: it.name, entryPoint: it.entrypoint === 1, lang: it.lang as "wgsl" | "typescript" })),
       currentFileKey: files.find(file => file.entrypoint)?.name,
     })
-  }, [])
+  }, [project, files])
 
   return (
     <div className="grid grid-cols-2 flex-grow h-full">

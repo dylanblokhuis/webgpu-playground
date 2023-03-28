@@ -7,6 +7,7 @@ import clsx from "clsx";
 import { useCallback } from "react";
 import debounce from 'lodash.debounce';
 import MenuActions from "./MenuActions";
+import { shallow } from "zustand/shallow";
 
 async function fetchWebGpuTypes() {
   const res = await fetch("/static/editor-types/webgpu.d.ts")
@@ -24,7 +25,7 @@ export default function EditorW() {
       updateCurrentFile: state.updateCurrentFile,
       setCurrentFile: state.setCurrentFile
     }
-  });
+  }, shallow);
 
   async function handleEditorWillMount(monaco: Monaco) {
     monaco.languages.typescript.typescriptDefaults.addExtraLib(await fetchWebGpuTypes(), "webgpu.d.ts")
@@ -69,9 +70,7 @@ export default function EditorW() {
     updateCurrentFile(code)
   }
 
-  const debouncedChangeHandler = useCallback(
-    debounce(handleChange, 500)
-    , []);
+  const debouncedChangeHandler = useCallback(debounce(handleChange, 250), []);
 
   return (
     <div className="flex flex-col border-l border-slate-700 h-full">

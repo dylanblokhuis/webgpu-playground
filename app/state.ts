@@ -100,7 +100,11 @@ interface State {
   wipeLogs: () => void
   unsavedChanges: boolean
   fps: number
+  setFps: (fps: number) => void
   project?: ProjectsTable
+
+  paused: boolean
+  setPaused: (paused: boolean) => void
 }
 
 const useStore = create<State>((set) => ({
@@ -132,7 +136,6 @@ const useStore = create<State>((set) => ({
       })
 
       return {
-        ...state,
         unsavedChanges: true,
         files
       }
@@ -141,7 +144,6 @@ const useStore = create<State>((set) => ({
   setCurrentFile(name) {
     set((state) => {
       return {
-        ...state,
         currentFileKey: name
       }
     })
@@ -149,7 +151,6 @@ const useStore = create<State>((set) => ({
   createFile(file) {
     set((state) => {
       return {
-        ...state,
         files: [
           ...state.files,
           file
@@ -161,7 +162,6 @@ const useStore = create<State>((set) => ({
   insertLog: (log) => {
     set((state) => {
       return {
-        ...state,
         logs: [
           ...state.logs,
           log
@@ -170,14 +170,28 @@ const useStore = create<State>((set) => ({
     })
   },
   wipeLogs: () => {
-    set((state) => {
+    set(() => {
       return {
-        ...state,
         logs: []
       }
     })
   },
-  fps: 0
+  fps: 0,
+  setFps: (fps: number) => {
+    set(() => {
+      return {
+        fps
+      }
+    })
+  },
+  paused: false,
+  setPaused: (paused: boolean) => {
+    set(() => {
+      return {
+        paused
+      }
+    })
+  }
 }));
 
 export default useStore;

@@ -1,10 +1,14 @@
-import { useFetcher } from '@remix-run/react'
+import { useFetcher, useMatches, useRouteLoaderData } from '@remix-run/react'
 import React, { useEffect } from 'react'
 import useStore from '~/state';
+import { shallow } from 'zustand/shallow'
+import { SerializeFrom } from '@remix-run/cloudflare';
+import { loader } from '~/root';
 
 export default function MenuActions() {
   const fetcher = useFetcher();
-  const { files, project, unsavedChanges } = useStore(state => ({ files: state.files, project: state.project, unsavedChanges: state.unsavedChanges }))
+  const data = useRouteLoaderData("root") as SerializeFrom<typeof loader>;
+  const { files, project, unsavedChanges } = useStore(state => ({ files: state.files, project: state.project, unsavedChanges: state.unsavedChanges }), shallow)
 
   function handleSubmit() {
     let name = project ? project.name : "Untitled"
@@ -59,7 +63,6 @@ export default function MenuActions() {
     }
   }, [])
 
-
   return (
     <div className='flex items-center gap-x-4'>
       <button type='button' onClick={handleSubmit} className="transition-colors bg-slate-800 hover:bg-slate-700 py-1 border text-sm border-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 text-white font-semibold px-3 rounded-lg w-full flex items-center justify-center sm:w-auto -mt-1">
@@ -70,7 +73,10 @@ export default function MenuActions() {
           </svg>
         )}
 
-        {project ? "Save" : "Save & share"}
+        {project?.user_id === data.user?.id && unsavedChanges && "Save changes"}
+        {project?.user_id === data.user?.id && !unsavedChanges && fetcher.state === "idle" && "Saved"}
+        {project?.user_id === data.user?.id && !unsavedChanges && fetcher.state !== "idle" && "Saving..."}
+        {project?.user_id !== data.user?.id && "Fork"}
       </button>
     </div>
 
